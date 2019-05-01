@@ -23,14 +23,14 @@
 # 3. After if the computer guess the digit but it's in the wrong position
 # it should save that number and put it in a different position on its next turn
 
-# 1. Display instructions
-# 2. Start out having the player being the code-breaker
-# 3. Have the computer randomly select 4 digits code
-# 4. Ask the player to guess
-# 5. Figure out how you would display the color for the code
 # 6. Display how many turns left the player has
 # 7. Display player won if they guessed the code before turns runs out
 # 8. Else display code-maker won
+
+class String
+  def red; "\e[31m#{self}\e[0m" end
+  def green; "\e[32m#{self}\e[0m" end
+end
 
 class CodeMaker
 
@@ -69,3 +69,70 @@ class CodeBreaker
     valid
   end
 end
+
+class Game
+  attr_accessor :code_breaker, :code_maker, :secret_code_copy, :guesses_copy, :turns
+
+  def initialize
+    @code_maker = CodeMaker.new
+    @code_breaker = CodeBreaker.new
+    @turns = 5
+    display_instructions
+    @secret_code_copy = @code_maker.generate_secret_code
+    @code_breaker.get_guesses
+  end
+
+  def display_instructions
+    puts "***************************************"
+    puts "*** Welcome To The Mastermind Game! ***"
+    puts "***************************************"
+    puts "======================================="
+    puts "************ Instructions *************"
+    puts "1. You have to break the secret code in"
+    puts "   order to win the game"
+    puts "2. You are given 5 guesses to break the"
+    puts "   code. The code ranges between 1 to 6"
+    puts "   A number can be repeated more than once!"
+    puts "3. Each time you enter your guesses...."
+    puts "   The computer will give you some hints"
+    puts "   on whether your guess had correct digit,"
+    puts "   incorrect digits or correct digits"
+    puts "   that are in the incorrect position\n "
+    puts "***************************************"
+    puts "*********** GUIDES TO HINTS ***********"
+    puts "***************************************"
+    puts "======================================="
+    puts "1. If you get a digit correct and it is"
+    puts "   in the correct position, the digit "
+    puts "   will be colored #{"green".green}"
+    puts "2. If you get a digit correct but in the"
+    puts "   wrong position, the digit will be colored white"
+    puts "3. If you get the digit incorrect, the "
+    puts "   digit will be colored #{"red".red}\n "
+    puts "For example:"
+    puts "If the secret code is:"
+    puts "1523"
+    puts "and your guess was:"
+    puts "1562"
+    puts "You will see the following result:"
+    puts "#{"15".green}#{"6".red}2"
+  end
+
+  def display_remaining_turns
+    puts "You have #{@turns} guesses remaining."
+  end
+
+  def out_of_turns?
+    @turns -= 1
+    out_of_turn = false
+    
+    if @turns == 0
+      out_of_turn = true
+    end
+
+    out_of_turn
+  end
+
+end
+
+new_game = Game.new
