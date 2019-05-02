@@ -53,6 +53,7 @@ class CodeBreaker
       
       break if guesses_valid?
     end
+    @guesses
   end
 
   def guesses_valid?
@@ -122,7 +123,7 @@ class Game
     
     if @turns == 0
       out_of_turn = true
-      puts "The secret code is still encrypted. The code maker wins!" if !player_won?
+      puts "The secret code was #{@secret_code_copy.join}. The code maker wins!" if !player_won?
     end
 
     out_of_turn
@@ -142,6 +143,7 @@ class Game
         hints << @guesses_copy[i].to_s.red
       end
     end
+
     puts "Hints:"
     puts hints
   end
@@ -152,8 +154,7 @@ class Game
 
     loop do
       display_remaining_turns
-      @code_breaker.get_guesses
-      @guesses_copy = @code_breaker.guesses
+      @guesses_copy = @code_breaker.get_guesses
       give_hints
 
       break if game_ended?
