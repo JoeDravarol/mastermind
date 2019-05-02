@@ -1,12 +1,3 @@
-# Build a Mastermind game from the command line where you have 12 turns to guess the secret 
-# code, starting with you guessing the computer’s random code.
-
-# Think about how you would set this problem up!
-
-# Build the game assuming the computer randomly selects the secret colors and the human 
-# player must guess them. Remember that you need to give the proper feedback on how 
-# good the guess was each turn!
-
 # Now refactor your code to allow the human player to choose whether he/she wants to be 
 # the creator of the secret code or the guesser.
 
@@ -39,6 +30,21 @@ class CodeMaker
     end
     @secret_code
   end
+
+  def make_secret_code
+    loop do
+      puts "Enter your 4 digits secret code. It must be between 1 to 6"
+      @secret_code = gets.chomp.split("").map(&:to_i)
+
+      break if secret_code_valid?(@secret_code)
+    end
+
+    puts "Your secret code is #{@secret_code.join}."
+  end
+
+  def secret_code_valid?(code)
+    code.length == 4 && code.all? { |digit| digit >= 1 && digit <= 6 }
+  end
 end
 
 class CodeBreaker
@@ -57,13 +63,7 @@ class CodeBreaker
   end
 
   def guesses_valid?
-    valid = false
-
-    if @guesses.length == 4 && @guesses.all? { |guess| guess >= 1 && guess <= 6 }
-      valid = true
-    end
-
-    valid
+    @guesses.length == 4 && @guesses.all? { |guess| guess >= 1 && guess <= 6 }
   end
 end
 
