@@ -23,10 +23,6 @@
 # 3. After if the computer guess the digit but it's in the wrong position
 # it should save that number and put it in a different position on its next turn
 
-# 6. Display how many turns left the player has
-# 7. Display player won if they guessed the code before turns runs out
-# 8. Else display code-maker won
-
 class String
   def red; "\e[31m#{self}\e[0m" end
   def green; "\e[32m#{self}\e[0m" end
@@ -50,7 +46,7 @@ class CodeBreaker
 
   def get_guesses 
     loop do
-      puts "Please enter 4 numbers within the range of 1 to 6 to break the secret code!"
+      puts "Enter 4 numbers within the range of 1 to 6 to break the secret code!"
       guesses = gets.chomp
       # Turn value from string to integer
       @guesses = guesses.split("").map(&:to_i)
@@ -76,10 +72,8 @@ class Game
   def initialize
     @code_maker = CodeMaker.new
     @code_breaker = CodeBreaker.new
-    @turns = 5
     display_instructions
-    @secret_code_copy = @code_maker.generate_secret_code
-    @code_breaker.get_guesses
+    play_game
   end
 
   def display_instructions
@@ -128,11 +122,84 @@ class Game
     
     if @turns == 0
       out_of_turn = true
+      puts "The secret code is still encrypted. The code maker wins!" if !player_won?
     end
 
     out_of_turn
   end
 
+  def give_hints
+    hints = ""
+
+    @secret_code_copy.each_index do |i|
+      if @secret_code_copy[i] == @guesses_copy[i]
+        hints << @guesses_copy[i].to_s.green
+
+      elsif @secret_code_copy.include?(@guesses_copy[i])
+        hints << @guesses_copy[i].to_s
+
+      else
+        hints << @guesses_copy[i].to_s.red
+      end
+    end
+    puts "Hints:"
+    puts hints
+  end
+
+  def play_game
+    @turns = 5
+    @secret_code_copy = @code_maker.generate_secret_code
+
+    loop do
+      display_remaining_turns
+      @code_breaker.get_guesses
+      @guesses_copy = @code_breaker.guesses
+      give_hints
+
+      break if game_ended?
+    end
+
+    play_again?
+  end
+
+  def player_won?
+    player_won = false
+    winning_code = []
+
+    @secret_code_copy.each_index do |i|
+      if @secret_code_copy[i] == @guesses_copy[i]
+        winning_code << @guesses_copy[i]
+      end
+    end
+
+    if winning_code.length == 4
+      puts "The code breaker has cracked the secret code!"
+      player_won = true
+    end
+    
+    player_won
+  end
+
+  def game_ended?
+    out_of_turns? || player_won?
+  end
+
+  def play_again?
+    input = nil
+
+    loop do
+      puts "Would you like to Play again? Y/N?"
+      input = gets.chomp.upcase
+
+      break if input == "Y" || input == "N"
+    end
+
+    if input == "Y"
+      play_game
+    else
+      puts "Thanks for playing!"
+    end
+  end
 end
 
 new_game = Game.new
