@@ -83,26 +83,47 @@ class CodeBreaker
 end
 
 class Game
-  attr_accessor :code_breaker, :code_maker, :secret_code_copy, :guesses_copy, :turns
+  attr_accessor :code_breaker, :code_maker, :secret_code_copy, :guesses_copy, :turns, :player_role
 
   def initialize
     @code_maker = CodeMaker.new
     @code_breaker = CodeBreaker.new
+    display_welcome
+    get_player_role
     display_instructions
     play_game
   end
 
-  def display_instructions
+  def display_welcome
     puts "***************************************"
     puts "*** Welcome To The Mastermind Game! ***"
     puts "***************************************"
     puts "======================================="
+  end
+
+  def get_player_role
+    loop do
+      puts "Which role would you like to play as?"
+      puts "1. Code Maker || 2. Code Breaker"
+      puts "Please select 1 or 2"
+      @player_role = gets.chomp
+      
+      break if @player_role == "1" || @player_role == "2"
+    end
+  end
+
+  def display_instructions
+    puts "***************************************"
     puts "************ Instructions *************"
-    puts "1. You have to break the secret code in"
-    puts "   order to win the game"
-    puts "2. You are given 5 guesses to break the"
-    puts "   code. The code ranges between 1 to 6"
-    puts "   A number can be repeated more than once!"
+    puts "***************************************"
+    puts "======================================="
+
+    if @player_role == "1"
+      code_maker_instructions
+    else
+      code_breaker_instructions
+    end
+
     puts "3. Each time you enter your guesses...."
     puts "   The computer will give you some hints"
     puts "   on whether your guess had correct digit,"
@@ -126,6 +147,22 @@ class Game
     puts "1562"
     puts "You will see the following result:"
     puts "#{"15".green}#{"6".red}2"
+  end
+
+  def code_breaker_instructions
+    puts "1. You have to break the secret code in"
+    puts "   order to win the game"
+    puts "2. You are given 5 guesses to break the"
+    puts "   code. The code ranges between 1 to 6"
+    puts "   A number can be repeated more than once!"
+  end
+
+  def code_maker_instructions
+    puts "1. You will create a 4 digits secret code."
+    puts "   The code must be between 1 to 6."
+    puts "2. The AI/Computer will have 5 guesses to"
+    puts "   try and crack your secret code. You win"
+    puts "   if your secret code is not cracked"
   end
 
   def display_remaining_turns
