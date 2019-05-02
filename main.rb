@@ -48,7 +48,7 @@ class CodeMaker
 end
 
 class CodeBreaker
-  attr_accessor :guesses
+  attr_accessor :guesses, :ai_guessses, :ai_correct_position
 
   def get_guesses 
     loop do
@@ -64,6 +64,21 @@ class CodeBreaker
 
   def guesses_valid?
     @guesses.length == 4 && @guesses.all? { |guess| guess >= 1 && guess <= 6 }
+  end
+
+  def get_ai_guesses
+    @ai_guesses = []
+    i = 0 
+
+    while i < 4
+      if ai_correct_pos[i] == 0
+        @ai_guesses[i] = 1 + rand(6)
+      else
+        @ai_guesses[i] = ai_correct_pos[i]
+      end
+    end
+
+    @ai_guesses
   end
 end
 
