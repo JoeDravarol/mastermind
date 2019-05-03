@@ -1,18 +1,11 @@
-# Now refactor your code to allow the human player to choose whether he/she wants to be 
-# the creator of the secret code or the guesser.
-
-# Build it out so that the computer will guess if you decide to choose your own secret colors.
-# Start by having the computer guess randomly (but keeping the ones that match exactly).
-
 # Next, add a little bit more intelligence to the computer player so that, if the computer has 
 # guessed the right color but the wrong position, its next guess will need to include that 
 # color somewhere. Feel free to make the AI even smarter.
 
-# Refactor to computer to be code-breaker
-# 1. Ask whether the player like to be the code-maker or breaker
-# 2. First have the computer randomly guess the code
-# 3. After if the computer guess the digit but it's in the wrong position
-# it should save that number and put it in a different position on its next turn
+# Refactor code (AI more intelligent)
+# 1. Create a simiar loop to the hints method which output white text
+# 2. Save the number and also its index
+# 3. On next guess put the number somewhere else beside it's index or the correct position digit
 
 class String
   def red; "\e[31m#{self}\e[0m" end
@@ -40,6 +33,7 @@ class CodeMaker
     end
 
     puts "Your secret code is #{@secret_code.join}."
+    @secret_code
   end
 
   def secret_code_valid?(code)
@@ -48,7 +42,11 @@ class CodeMaker
 end
 
 class CodeBreaker
-  attr_accessor :guesses, :ai_guessses, :ai_correct_position
+  attr_accessor :guesses, :ai_guesses, :ai_correct_position
+
+  def initialize
+    @ai_correct_position = [0, 0, 0, 0]
+  end
 
   def get_guesses 
     loop do
@@ -71,15 +69,27 @@ class CodeBreaker
     i = 0 
 
     while i < 4
-      if ai_correct_pos[i] == 0
+      if @ai_correct_position[i] == 0
         @ai_guesses[i] = 1 + rand(6)
       else
-        @ai_guesses[i] = ai_correct_pos[i]
+        @ai_guesses[i] = @ai_correct_position[i]
       end
+      i += 1
     end
 
     @ai_guesses
   end
+
+  def store_ai_correct_digit(secret_code)
+
+    secret_code.each_index do |i|   
+      if secret_code[i] == @ai_guesses[i]
+        @ai_correct_position[i] = @ai_guesses[i]
+      end
+    end
+
+  end
+
 end
 
 class Game
@@ -181,18 +191,18 @@ class Game
     out_of_turn
   end
 
-  def give_hints
+  def give_hints(guesses)
     hints = ""
 
     @secret_code_copy.each_index do |i|
-      if @secret_code_copy[i] == @guesses_copy[i]
-        hints << @guesses_copy[i].to_s.green
+      if @secret_code_copy[i] == guesses[i]
+        hints << guesses[i].to_s.green
 
-      elsif @secret_code_copy.include?(@guesses_copy[i])
-        hints << @guesses_copy[i].to_s
+      elsif @secret_code_copy.include?(guesses[i])
+        hints << guesses[i].to_s
 
       else
-        hints << @guesses_copy[i].to_s.red
+        hints << guesses[i].to_s.red
       end
     end
 
@@ -202,12 +212,18 @@ class Game
 
   def play_game
     @turns = 5
-    @secret_code_copy = @code_maker.generate_secret_code
+    @secret_code_copy = @player_role == "1" ? @code_maker.make_secret_code : @code_maker.generate_secret_code
 
     loop do
       display_remaining_turns
-      @guesses_copy = @code_breaker.get_guesses
-      give_hints
+      @guesses_copy = @player_role == "1" ? @code_breaker.get_ai_guesses : @code_breaker.get_guesses
+      puts "Your guess:"
+      puts @guesses_copy.join()
+      give_hints(@guesses_copy)
+
+      if @player_role == "1"
+        @code_breaker.store_ai_correct_digit(@secret_code_copy)
+      end
 
       break if game_ended?
     end
@@ -226,7 +242,7 @@ class Game
     end
 
     if winning_code.length == 4
-      puts "The code breaker has cracked the secret code!"
+      puts "The code breaker has cracked the secret code! The code breaker wins!"
       player_won = true
     end
     
@@ -238,6 +254,8 @@ class Game
   end
 
   def play_again?
+    # Reset Code Breaker data
+    @code_breaker.ai_correct_position = [0, 0, 0, 0]
     input = nil
 
     loop do
@@ -248,6 +266,7 @@ class Game
     end
 
     if input == "Y"
+      get_player_role
       play_game
     else
       puts "Thanks for playing!"
