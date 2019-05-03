@@ -4,4 +4,6 @@ Mastermind is a code-breaking game for two players. The idea of the game is for 
 
 This is the second project where I will be using the OOP concept I have learnt so far to recreate the Mastermind game in command line. I will be adding a computer/AI for the player to play against.
 
+To view this project click [here](https://repl.it/@JoeDravarol/Mastermind-Game)
+
 Created as part of The Odin Project's [curriculum](https://www.theodinproject.com/courses/ruby-programming/lessons/oop)
