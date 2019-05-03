@@ -1,12 +1,3 @@
-# Next, add a little bit more intelligence to the computer player so that, if the computer has 
-# guessed the right color but the wrong position, its next guess will need to include that 
-# color somewhere. Feel free to make the AI even smarter.
-
-# Refactor code (AI more intelligent)
-# 1. Create a simiar loop to the hints method which output white text
-# 2. Save the number and also its index
-# 3. On next guess put the number somewhere else beside it's index or the correct position digit
-
 class String
   def red; "\e[31m#{self}\e[0m" end
   def green; "\e[32m#{self}\e[0m" end
@@ -27,6 +18,7 @@ class CodeMaker
   def make_secret_code
     loop do
       puts "Enter your 4 digits secret code. It must be between 1 to 6"
+      # Turn value from string to integer
       @secret_code = gets.chomp.split("").map(&:to_i)
 
       break if secret_code_valid?(@secret_code)
@@ -42,10 +34,11 @@ class CodeMaker
 end
 
 class CodeBreaker
-  attr_accessor :guesses, :ai_guesses, :ai_correct_position
+  attr_accessor :guesses, :ai_guesses, :ai_correct_position, :not_secret_code
 
   def initialize
     @ai_correct_position = [0, 0, 0, 0]
+    @not_secret_code = []
   end
 
   def get_guesses 
@@ -69,9 +62,19 @@ class CodeBreaker
     i = 0 
 
     while i < 4
+      # Check whether AI has guess correct value in the correct position yet  
       if @ai_correct_position[i] == 0
-        @ai_guesses[i] = 1 + rand(6)
+
+        loop do 
+          @ai_guesses[i] = 1 + rand(6)
+
+          # If ai guess[i] is not in the secret code repeat with a digit
+          # that is in the secret code
+          break if !@not_secret_code.include?(@ai_guesses[i])
+        end
       else
+        # If AI guess correctly previously, get the correct digit 
+        # and position and put it into ai guess
         @ai_guesses[i] = @ai_correct_position[i]
       end
       i += 1
@@ -81,15 +84,22 @@ class CodeBreaker
   end
 
   def store_ai_correct_digit(secret_code)
+    # Clone a copy of secret code
+    secret_code_remain = secret_code.dup
 
     secret_code.each_index do |i|   
+      # If Ai guess correct digit and correct position
       if secret_code[i] == @ai_guesses[i]
         @ai_correct_position[i] = @ai_guesses[i]
+        secret_code_remain[i] = 0
+      end
+
+      # If guess[i] is incorrect store that digit/value
+      if !secret_code_remain.include?(@ai_guesses[i])
+        @not_secret_code << @ai_guesses[i]
       end
     end
-
   end
-
 end
 
 class Game
@@ -128,11 +138,7 @@ class Game
     puts "***************************************"
     puts "======================================="
 
-    if @player_role == "1"
-      code_maker_instructions
-    else
-      code_breaker_instructions
-    end
+    @player_role == "1" ? code_maker_instructions : code_breaker_instructions
 
     puts "3. Each time you enter your guesses...."
     puts "   The computer will give you some hints"
@@ -193,12 +199,15 @@ class Game
 
   def give_hints(guesses)
     hints = ""
+    secret_code_remain = @secret_code_copy.dup
 
     @secret_code_copy.each_index do |i|
       if @secret_code_copy[i] == guesses[i]
         hints << guesses[i].to_s.green
+        
+        secret_code_remain[i] = 0
 
-      elsif @secret_code_copy.include?(guesses[i])
+      elsif secret_code_remain.include?(guesses[i])
         hints << guesses[i].to_s
 
       else
@@ -256,6 +265,7 @@ class Game
   def play_again?
     # Reset Code Breaker data
     @code_breaker.ai_correct_position = [0, 0, 0, 0]
+    @code_breaker.not_secret_code = []
     input = nil
 
     loop do
